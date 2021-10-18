@@ -126,11 +126,18 @@ class ExampleProgram:
                         #delete the column titles    
                         activities.pop(0)
                     # check for each activity in the labels.txt file 
-                    for check in activities:
-                        rows = self.db.Activity.find_one({},{"user_id": check[0], "start_date_time": check[1], "end_date_time": check[2]})
+
+                    for line in activities:
+                        check = []
+                        for item in line:
+                            item = item.replace("/", "-")
+                            check.append(item)
+                        
+                        rows = self.db.Activity.find({"user_id": check[0], "start_date_time": check[1], "end_date_time": check[2]})
                         #  if there is a match update this Activity with the transportation mode
                         if rows:
-                            self.db.Activity.update({"id": rows["_id"]}, { '$set': {"transportation_mode": check[3]} } )
+                            for row in rows:
+                                self.db.Activity.update({"_id": row["_id"]}, { '$set': {"transportation_mode": check[3]} } )
                         
                                      
             else:
