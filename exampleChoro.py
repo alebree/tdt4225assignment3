@@ -133,11 +133,10 @@ class ExampleProgram:
                             item = item.replace("/", "-")
                             check.append(item)
                         
-                        rows = self.db.Activity.find({"user_id": check[0], "start_date_time": check[1], "end_date_time": check[2]})
+                        row = self.db.Activity.find_one({"user_id": check[0], "start_date_time": check[1], "end_date_time": check[2]})
                         #  if there is a match update this Activity with the transportation mode
-                        if rows:
-                            for row in rows:
-                                self.db.Activity.update({"_id": row["_id"]}, { '$set': {"transportation_mode": check[3]} } )
+                        if row:
+                            self.db.Activity.update_one({"_id": row["_id"]}, { '$set': {"transportation_mode": check[3]} } )
                         
                                      
             else:
