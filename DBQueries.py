@@ -17,14 +17,31 @@ class ExampleProgram:
 
         print(result1, result2, result3)
 
-    
+    def query_2(self):
+        print("Starting count...")
+        result = 0
+        max = 1
+        min = 1
+        for user in range(182):
+            user = f"{user:03d}"
+            print(user)
+            temp = self.db.Activity.count_documents({"user_id": user})
+            result = temp + result
+            print(temp)
+            if temp > max:
+                max = temp
+            if temp < min:
+                min = temp
+
+        average = result / 182
+        print(average, max, min)
 
 
 def main():
     program = None
     try:
         program = ExampleProgram()
-        program.query_1()
+        program.query_2()
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
