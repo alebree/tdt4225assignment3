@@ -1,4 +1,7 @@
 from pprint import pprint
+
+import numpy as np
+
 from DbConnector import DbConnector
 
 
@@ -24,10 +27,8 @@ class ExampleProgram:
         min = 1
         for user in range(182):
             user = f"{user:03d}"
-            print(user)
             temp = self.db.Activity.count_documents({"user_id": user})
             result = temp + result
-            print(temp)
             if temp > max:
                 max = temp
             if temp < min:
@@ -36,12 +37,32 @@ class ExampleProgram:
         average = result / 182
         print(average, max, min)
 
+    def query_3(self):
+        print("Counting...")
+        dic = {}
+        dic_sorted = {}
+        user_list = []
+        position = 0
+        for user in range(182):
+            user = f"{user:03d}"
+            temp = self.db.Activity.count_documents({"user_id": user})
+            dic[temp] = user
+        dic_sorted = sorted(dic.items(), reverse=True)
+        for i in dic_sorted:
+            user_list.append(i[1])
+            position = position + 1
+            if position > 9:
+                break
+        print(user_list)
+
 
 def main():
     program = None
     try:
         program = ExampleProgram()
+        program.query_1()
         program.query_2()
+        program.query_3()
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
