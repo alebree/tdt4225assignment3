@@ -4,6 +4,8 @@ from pprint import pprint
 import numpy as np
 import geopy.distance
 from DbConnector import DbConnector
+from datetime import datetime, timedelta
+from geopy.distance import geodesic
 
 
 class ExampleProgram:
@@ -14,7 +16,7 @@ class ExampleProgram:
         self.db = self.connection.db
 
     def query_1(self):
-        print("Query 1: Counting documents...")
+        print("Query 1: Starting...")
         result1 = self.db.User.count_documents({})
         result2 = self.db.Activity.count_documents({})
         result3 = self.db.TrackPoint.count_documents({})
@@ -22,7 +24,7 @@ class ExampleProgram:
         print(result1, result2, result3)
 
     def query_2(self):
-        print("Query 2: Starting count...")
+        print("Query 2: Starting...")
         result = 0
         max = 1
         min = 1
@@ -39,7 +41,7 @@ class ExampleProgram:
         print(average, max, min)
 
     def query_3(self):
-        print("Query 3: Counting...")
+        print("Query 3: Starting...")
         dic = {}
         dic_sorted = {}
         user_list = []
@@ -56,8 +58,31 @@ class ExampleProgram:
                 break
         print(user_list)
 
+    def query_6(self):
+        print("Query 6: Starting...")
+        dot1 = (39.97548, 116.33031)
+        time1 = "2008-08-24 15:38:00"
+        time1 = datetime.strptime(time1, '%Y-%m-%d %H:%M:%S')
+        covid_users = []
+        for user in range(182):
+            user = f"{user:03d}"
+            print("Starting ", user)
+            activity_ids = []
+            for x in self.db.Activity.find({"user_id": user}):
+                activity_ids.append(x["_id"])
+            for activity in activity_ids:
+                for x in self.db.TrackPoint.find({"activity_id": activity}):
+                    dot2 = (x["lat"], x["lon"])
+                    time2 = x["date_time"]
+                    time2 = datetime.strptime(time2, '%Y-%m-%d %H:%M:%S')
+                    if geodesic(dot1, dot2).m < 100 and time1.year == time2.year and time1.month ==\
+                            time2.month and time1.day == time2.day and time1.hour ==\
+                            time2.hour and time1.minute == time2.minute:
+                        covid_users.append(user)
+                        print(covid_users)
+
     def query_7(self):
-        print("Query 7: Calculating...")
+        print("Query 7: Starting...")
         total_users = []
         taxi_users = []
         for user in range(182):
@@ -70,7 +95,7 @@ class ExampleProgram:
         print(sorted(list(set(total_users) - set(taxi_users))))
 
     def query_8(self):
-        print("Query 8: Finding and Counting...")
+        print("Query 8: Starting...")
         transportation_array = []
         dic = {}
         dic_num = {}
@@ -97,7 +122,7 @@ class ExampleProgram:
         print(dic_num)
 
     def query_10(self):
-        print("Query 10: Calculating...")
+        print("Query 10: Starting...")
         rows = []
         for x in self.db.Activity.find({"user_id": "112", "transportation_mode": "walk"}):
             rows.append(x)
@@ -136,20 +161,17 @@ class ExampleProgram:
             # Get the altitudes for every activity of the User
             for activity in activity_ids:
                 rows = []
-                """select_query = "Select altitude FROM TrackPoint where activity_id = %s;" % (activity[0])
-                self.cursor.execute(select_query)
-                rows = self.cursor.fetchall()"""
                 for x in self.db.TrackPoint.find({"activity_id": activity}):
                     rows.append(x["altitude"])
                 total_altitude_activity = 0
                 for i in range(0, len(rows)):
                     if i == 0:
                         continue
-                    # print(rows[i][0])
+                    # print(rows[i])
                     if rows[i] == -777:
                         continue
                     if rows[i] > rows[i - 1]:
-                        # print(rows[i][0])
+                        # print(rows[i])
                         total_altitude_activity += rows[i] - rows[i - 1]
 
                 # add the gained altitude of every activity of the user to the total user gained altitude
@@ -162,12 +184,56 @@ class ExampleProgram:
         sorted_dic = dict(sorted(user_altitude_dic.items(), key=lambda item: item[1], reverse=True))
         return print('Solution in decending order: ', sorted_dic)
 
+    def query_12(self):
+        print("Query 12: Starting...")
+        # dictionary with invalid activities per user
+        invalid_activities_users = {}
+        # First get all activities from one user
+        for user in range(182):
+            user = f"{user:03d}"
+            activity_ids = []
+            for x in self.db.Activity.find({"user_id": user}):
+                activity_ids.append(x["_id"])
+
+            invalid_activities = []
+            # Get the TrackPoint data for one activity
+            for activity in activity_ids:
+                rows = []
+                for x in self.db.TrackPoint.find({"activity_id": activity}):
+                    rows.append(datetime.strptime(x["date_time"], '%Y-%m-%d %H:%M:%S'))
+                invalid_activity = False
+                for i in range(0, len(rows)):
+                    # skip first entry
+                    if i == 0:
+                        continue
+                    time_difference = rows[i] - rows[i - 1]
+                    # check if consecutive trackpoint is earlier ---> never actually happens but still
+                    if time_difference < timedelta(minutes=0):
+                        invalid_activity = True
+                    # check if consecutive trackpoint is more than 5 min later than previoous trackpoint
+                    if time_difference > timedelta(minutes=5):
+                        # print(time_difference)
+                        # print('Invalid Activity', activity)
+                        invalid_activity = True
+                    else:
+                        pass
+
+                if invalid_activity is True:
+                    invalid_activities.append(activity)
+
+            if len(invalid_activities) > 0:
+                invalid_activities_users[user] = invalid_activities
+
+        # print(invalid_activities_users)
+        print(len(invalid_activities_users))
+        for key, value in invalid_activities_users.items():
+            print(key, len([item for item in value if item]))
 
 def main():
     program = None
     try:
         program = ExampleProgram()
-        program.query_11()
+        program.query_6()
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
