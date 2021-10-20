@@ -55,6 +55,22 @@ class ExampleProgram:
                 break
         print(user_list)
 
+    def query_7(self):
+        print("Calculating...")
+        total_users = []
+        taxi_users = []
+        for user in range(182):
+            user = f"{user:03d}"
+            total_users.append(user)
+            rows = self.db.Activity.find({"user_id": user, "transportation_mode": "taxi"})
+            for row in rows:
+                if row["user_id"] not in taxi_users:
+                    taxi_users.append(row["user_id"])
+        print(sorted(list(set(total_users) - set(taxi_users))))
+
+
+
+
 
 def main():
     program = None
@@ -63,6 +79,7 @@ def main():
         program.query_1()
         program.query_2()
         program.query_3()
+        program.query_7()
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
