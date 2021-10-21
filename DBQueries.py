@@ -58,6 +58,24 @@ class ExampleProgram:
                 break
         print(user_list)
 
+    # Find the number of users that have started the activity in one day and ended the activity the next day
+    def query_4(self):
+        print("Query 4: Starting...")
+        users = []
+        rows = self.db.Activity.find({})
+        for doc in rows: 
+            start = date_time_obj = datetime.strptime(doc['start_date_time'][:10], '%Y-%m-%d')
+            end = date_time_obj = datetime.strptime(doc['end_date_time'][:10], '%Y-%m-%d')
+
+            # when end_date minus 1 day is the start date add this user to a list
+            if end - timedelta(days=1) == start:
+                user = doc['user_id']
+                if user not in users:
+                    users.append(user)
+        print(users)
+        print('Amount of relevant users:', len(users))
+        return
+
     def query_6(self):
         print("Query 6: Starting...")
         dot1 = (39.97548, 116.33031)
@@ -233,7 +251,7 @@ def main():
     program = None
     try:
         program = ExampleProgram()
-        program.query_6()
+        program.query_4()
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
