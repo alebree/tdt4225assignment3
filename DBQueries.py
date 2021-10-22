@@ -139,6 +139,76 @@ class ExampleProgram:
                 dic_num[j["transportation_mode"]] = dic_num[j["transportation_mode"]] + 1
         print(dic_num)
 
+    def task9a_most_activities(self):
+        rows = self.db.Activity.find({})
+        yearmonth = []
+        activities_month = {}
+        for i in rows:
+            if i["start_date_time"][:7] in yearmonth:
+                pass
+            else:
+                yearmonth.append(i["start_date_time"][:7])
+        #build dic to with month as key to count activities
+        for z in yearmonth:
+            activities_month[z] = 0
+        rows2 = self.db.Activity.find({}) # query needs to be done again
+        for point in rows2:
+            activities_month[point["start_date_time"][:7]] += 1
+        #sort dictionary to get month with most activities
+        sorted_dic = dict(sorted(activities_month.items(), key=lambda item: item[1], reverse=True))
+        return print(sorted_dic)
+
+    def task9b_amount_of_activities_per_user(self):
+        rows = self.db.Activity.find({})
+        activities_user = {}
+        for point in rows:
+            if point["start_date_time"][:7] == "2008-11":
+                if not point["user_id"] in activities_user:
+                    activities_user[point["user_id"]] = 1
+                else:
+                    activities_user[point["user_id"]] += 1
+        # sort dictionary to get month with most activities
+        sorted_dic = dict(sorted(activities_user.items(), key=lambda item: item[1], reverse=True))
+        return print(sorted_dic)
+
+
+    def task9b_user62(self):
+        rows = self.db.Activity.find({"user_id": "062"})
+        activity_ids = []
+        for i in rows:
+            if i["start_date_time"][:7] == "2008-11":
+                activity_ids.append(i["_id"])
+        print('Number of Activities user 62: ', len(activity_ids))
+        import datetime # import needs to happen here to be consitent with other queries
+        totaltime = datetime.timedelta(0,0,0)
+        for id in activity_ids:
+            data = self.db.Activity.find({"_id": id})
+            # convert datetime string to actual datetime object
+            start = datetime.datetime.strptime(data[0]['start_date_time'], '%Y-%m-%d %H:%M:%S')
+            end = datetime.datetime.strptime(data[0]['end_date_time'], '%Y-%m-%d %H:%M:%S')
+            timedelta = end - start
+            totaltime += timedelta
+        return print('Total hours recorded user 62: ', totaltime) 
+
+    def task9b_user128(self):
+        rows = self.db.Activity.find({"user_id": "128"})
+        activity_ids = []
+        for i in rows:
+            if i["start_date_time"][:7] == "2008-11":
+                activity_ids.append(i["_id"])
+        print('Number of Activities user 128: ', len(activity_ids))
+        import datetime # import needs to happen here to be consitent with other queries
+        totaltime = datetime.timedelta(0,0,0)
+        for id in activity_ids:
+            data = self.db.Activity.find({"_id": id})
+            # convert datetime string to actual datetime object
+            start = datetime.datetime.strptime(data[0]['start_date_time'], '%Y-%m-%d %H:%M:%S')
+            end = datetime.datetime.strptime(data[0]['end_date_time'], '%Y-%m-%d %H:%M:%S')
+            timedelta = end - start
+            totaltime += timedelta
+        return print('Total hours recorded user 128: ', totaltime) 
+
+
     def query_10(self):
         print("Query 10: Starting...")
         rows = []
@@ -251,7 +321,7 @@ def main():
     program = None
     try:
         program = ExampleProgram()
-        program.query_4()
+        program.task9b_amount_of_activities_per_user()
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
