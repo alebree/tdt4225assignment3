@@ -96,8 +96,10 @@ class ExampleProgram:
                     if geodesic(dot1, dot2).m < 100 and time1.year == time2.year and time1.month ==\
                             time2.month and time1.day == time2.day and time1.hour ==\
                             time2.hour and time1.minute == time2.minute:
-                        covid_users.append(user)
-                        print(covid_users)
+                        if user not in covid_users:
+                            covid_users.append(user)
+                            
+        print(covid_users)
 
     def query_7(self):
         print("Query 7: Starting...")
